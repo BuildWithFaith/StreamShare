@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "motion/react"
-import { Home, MenuIcon, Video, Share, X } from "lucide-react"
+import { Home, MenuIcon, Share, Video, X } from "lucide-react"
+import { AnimatePresence, motion } from "motion/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 interface MenuItem {
   icon: React.ReactNode
@@ -22,25 +22,25 @@ const menuItems: MenuItem[] = [
     icon: <Home className="h-5 w-5" />,
     label: "Home",
     href: "/",
-    gradient: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.06) 50%, rgba(29,78,216,0) 100%)",
-    activeGradient: "radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.15) 50%, rgba(29,78,216,0.05) 100%)",
-    iconColor: "text-blue-500",
-  },
-  {
-    icon: <Video className="h-5 w-5" />,
-    label: "Video Call",
-    href: "/videocall",
-    gradient: "radial-gradient(circle, rgba(249,115,22,0.15) 0%, rgba(234,88,12,0.06) 50%, rgba(194,65,12,0) 100%)",
-    activeGradient: "radial-gradient(circle, rgba(249,115,22,0.3) 0%, rgba(234,88,12,0.15) 50%, rgba(194,65,12,0.05) 100%)",
-    iconColor: "text-orange-500",
+    gradient: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%)",
+    activeGradient: "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%)",
+    iconColor: "text-black",
   },
   {
     icon: <Share className="h-5 w-5" />,
     label: "Share Files",
     href: "/sharefiles",
-    gradient: "radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(22,163,74,0.06) 50%, rgba(21,128,61,0) 100%)",
-    activeGradient: "radial-gradient(circle, rgba(34,197,94,0.3) 0%, rgba(22,163,74,0.15) 50%, rgba(21,128,61,0.05) 100%)",
-    iconColor: "text-green-500",
+    gradient: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%)",
+    activeGradient: "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%)",
+    iconColor: "text-black",
+  },
+  {
+    icon: <Video className="h-5 w-5" />,
+    label: "Video Call",
+    href: "/videocall",
+    gradient: "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%)",
+    activeGradient: "radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%)",
+    iconColor: "text-black",
   },
 ]
 
@@ -131,7 +131,7 @@ function Menu() {
       {/* Mobile menu button */}
       <motion.button
         ref={buttonRef}
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-background/90 backdrop-blur-lg border border-border/40 shadow-md"
+        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/20 backdrop-blur-lg border border-white/30 shadow-md"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -141,9 +141,9 @@ function Menu() {
         aria-label={isOpen ? "Close menu" : "Open menu"}
       >
         {isOpen ? (
-          <X className="h-6 w-6" />
+          <X className="h-6 w-6 text-black" />
         ) : (
-          <MenuIcon className="h-6 w-6" />
+          <MenuIcon className="h-6 w-6 text-black" />
         )}
       </motion.button>
 
@@ -161,7 +161,7 @@ function Menu() {
           >
             {/* Backdrop - clicking here will close the menu */}
             <motion.div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -171,7 +171,7 @@ function Menu() {
             {/* Menu content */}
             <motion.nav
               ref={menuRef}
-              className="p-6 rounded-2xl bg-background/85 backdrop-blur-lg border border-white/10 shadow-xl relative flex flex-col items-center justify-center w-[90%] max-w-sm mx-auto"
+              className="p-6 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/30 shadow-xl relative flex flex-col items-center justify-center w-[90%] max-w-sm mx-auto"
               initial={{ opacity: 0, scale: 0.9, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -191,7 +191,7 @@ function Menu() {
                 initial="hidden"
                 animate="show"
               >
-                {menuItems.map((item) => {
+                {menuItems.map((item, index) => {
                   const isActive = pathname === item.href
                   
                   return (
@@ -202,27 +202,23 @@ function Menu() {
                         hidden: { opacity: 0, y: 20 },
                         show: { opacity: 1, y: 0 },
                       }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: 0.1 * index,
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 20,
+                      }}
                     >
                       <Link href={item.href} onClick={() => setIsOpen(false)} className="block w-full">
                         <motion.div
                           className={`flex items-center gap-3 px-5 py-4 rounded-xl text-base font-medium transition ${
                             isActive 
-                              ? 'bg-white/20 text-black shadow-lg' 
-                              : 'bg-white/10 text-black/50 hover:text-black'
+                              ? 'bg-white text-black shadow-lg' 
+                              : 'bg-white/50 text-black hover:bg-white/70'
                           }`}
-                          style={{
-                            background: isActive 
-                              ? `linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)`
-                              : `linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)`,
-                            boxShadow: isActive 
-                              ? "0 8px 32px rgba(0, 0, 0, 0.2)"
-                              : "0 8px 32px rgba(0, 0, 0, 0.1)",
-                          }}
-                          whileHover={{
-                            scale: 1.02,
-                            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
-                            background: `linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%)`,
-                          }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <motion.div
@@ -237,9 +233,9 @@ function Menu() {
                               className="ml-auto flex items-center justify-center"
                               layoutId="activeIndicator"
                             >
-                              <span className="w-3 h-3 rounded-full bg-white shadow-glow" 
+                              <span className="w-3 h-3 rounded-full bg-black shadow-glow" 
                                 style={{
-                                  boxShadow: "0 0 8px 2px rgba(255, 255, 255, 0.6)"
+                                  boxShadow: "0 0 8px 2px rgba(0, 0, 0, 0.3)"
                                 }}
                               />
                             </motion.div>

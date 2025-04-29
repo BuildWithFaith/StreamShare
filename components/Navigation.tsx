@@ -1,16 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
-import { Home, Video, Share } from "lucide-react"
+import { Home, Share, Video } from "lucide-react"
 import { motion } from "motion/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { Button } from "./ui/button"
 
 const navLinks = [
   { href: "/", icon: Home, label: "Home" },
-  { href: "/videocall", icon: Video, label: "Video Call" },
   { href: "/sharefiles", icon: Share, label: "Share Files" },
+  { href: "/videocall", icon: Video, label: "Video Call" },
 ]
 
 export function Navigate() {
