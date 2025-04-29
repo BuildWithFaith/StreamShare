@@ -1584,7 +1584,7 @@ export default function Home() {
       <PageSeo />
 
       <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
-        <div className="relative w-full max-w-5xl flex justify-center aspect-[9/16] xl:aspect-video rounded-2xl backdrop-blur-xl border-2 border-white/20 shadow-xl overflow-hidden">
+        <div className="relative w-full max-w-5xl flex justify-center aspect-[9/16] xl:aspect-video rounded-2xl backdrop-blur-xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
           {/* Remote Video */}
           {remoteStream ? (
             <video 

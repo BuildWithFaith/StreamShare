@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Progress } from "@/components/ui/progress"
-import { useDropzone } from "react-dropzone"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, File, Trash2, Play, Pause, X, FileText, Image, Video, Music, Archive, FileX } from "lucide-react"
-import { toast } from "@/components/ui-toast"
-import { usePeer } from "@/contexts/PeerContext"
-import { Button } from "@/components/ui/button"
 import FileWorkerManager, { type FileMetadata } from "@/components/file-worker-manager"
 import PageSeo from "@/components/FileSharingSeo"
+import { toast } from "@/components/ui-toast"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { usePeer } from "@/contexts/PeerContext"
+import { Archive, File, FileText, FileX, Image, Music, Pause, Play, Trash2, Upload, Video, X } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { useDropzone } from "react-dropzone"
 
 interface TransferRecord {
   id: string
@@ -699,7 +699,7 @@ export default function FilesPage() {
         <div className="space-y-6">
           {/* File transfer area */}
           {isConnected ? (
-            <Card className="bg-white/10 border-0 shadow-lg backdrop-blur-xl rounded-3xl overflow-hidden">
+            <Card className="backdrop-blur-xl rounded-2xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
               <CardContent className=" space-y-6 p-6 ">
                 <div
                   {...getRootProps()}
@@ -798,24 +798,25 @@ export default function FilesPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-white/10 backdrop-blur-xl border-0 shadow-lg rounded-3xl overflow-hidden">
-              <CardContent className="p-6">
-                <p className="text-center text-white/70">Please connect to a peer before sharing files.</p>
+            <Card className="backdrop-blur-xl rounded-2xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
+              <CardContent className="p-3">
+                <p className="text-center text-white">Please connect to a peer before sharing files.</p>
               </CardContent>
             </Card>
           )}
 
           {/* History section */}
-          <Card className="bg-white/10 backdrop-blur-xl border-0 shadow-lg rounded-3xl overflow-hidden">
+          <Card className="backdrop-blur-xl rounded-2xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
             <CardHeader className=" pb-4 flex flex-row justify-between items-center">
-              <CardTitle className="text-white text-2xl font-light">Recent Transfers</CardTitle>
+              <CardTitle className="text-white">Recent Transfers</CardTitle>
               <Button
                 variant="ghost"
                 onClick={clearHistory}
-                className="rounded-xl bg-white text-black"
+                className="rounded-2xl w-fit h-fit p-1 px-2 bg-white text-black"
                 disabled={transferHistory.length === 0}
+                size="sm"
               >
-                <Trash2 className="h-4 w-4 mr-2" /> Clear All
+                <Trash2/> Clear All
               </Button>
             </CardHeader>
             <CardContent className="p-0">

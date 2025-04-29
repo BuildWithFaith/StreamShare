@@ -1,11 +1,13 @@
 import { MenuBar } from "@/components/menu-bar";
 import { Navigate } from "@/components/Navigation";
-import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui-toast";
 import { PeerProvider } from "@/contexts/PeerContext";
 import type { Metadata } from "next";
+import { Nunito } from 'next/font/google';
 import type React from "react";
 import "./globals.css";
+
+const Font = Nunito({weight: "400", display: "swap", subsets: ["latin"]});
 
 export const metadata: Metadata = {
   title: "File Sharing and Video Call App",
@@ -19,15 +21,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={Font.className} suppressHydrationWarning>
       <body className="antialiased">
         <PeerProvider>
           <MenuBar />
           <main className="relative min-h-screen w-full bg-[url('/background_image.jpg')] bg-fixed bg-center bg-cover overflow-hidden">
             <div className="absolute inset-0 backdrop-blur-md bg-black/20"></div>
-            <PageTransition>
               {children}
-            </PageTransition>
           </main>
           <Toaster/>
           <Navigate />

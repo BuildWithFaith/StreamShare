@@ -12,7 +12,7 @@ import {
   HelpCircle,
   Link,
   QrCode,
-  UserMinus
+  UserMinus,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { QRCodeSVG } from "qrcode.react";
@@ -60,12 +60,7 @@ export default function Home() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <AppSeo />
       <div className="w-full max-w-md">
-        <motion.div
-          className="backdrop-blur-xl rounded-2xl border border-white/20 bg-white/5 shadow-xl p-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="backdrop-blur-xl rounded-2xl border border-white/20 bg-white/5 shadow-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-extrabold text-white">Streamlet</h2>
             <Button
@@ -78,23 +73,32 @@ export default function Home() {
               <HelpCircle size={20} />
             </Button>
           </div>
-          
+
           {/* Help Section */}
           <AnimatePresence>
             {showHelp && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
                 <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-xl p-3 mb-4">
-                  <h3 className="text-white font-medium text-sm mb-2">How to connect:</h3>
+                  <h3 className="text-white font-medium text-sm mb-2">
+                    How to connect:
+                  </h3>
                   <ol className="text-white/80 text-xs space-y-2 list-decimal pl-4">
-                    <li>Share your Peer ID with your friend (copy/paste or QR code)</li>
+                    <li>
+                      Share your Peer ID with your friend (copy/paste or QR
+                      code)
+                    </li>
                     <li>Ask your friend for their Peer ID</li>
-                    <li>Enter their Peer ID in the input field and click Connect</li>
-                    <li>Once connected, you can share files and start video calls</li>
+                    <li>
+                      Enter their Peer ID in the input field and click Connect
+                    </li>
+                    <li>
+                      Once connected, you can share files and start video calls
+                    </li>
                   </ol>
                 </div>
               </motion.div>
@@ -154,12 +158,14 @@ export default function Home() {
                     <p className="text-xs font-mono mb-2 opacity-80">
                       ID: <span>{connectedPeerId?.substring(0, 8)}...</span>
                     </p>
-                    <p className="text-xs text-center mb-2">You can now share files and start video calls</p>
+                    <p className="text-xs text-center mb-2">
+                      You can now share files and start video calls
+                    </p>
                     <Button
                       onClick={disconnectPeer}
                       variant="outline"
                       size="sm"
-                      className="bg-red-500/20 hover:bg-red-500/30 text-red-200 border-red-500/30 text-xs w-full"
+                      className="bg-red-500/20 hover:text-white hover:bg-red-500/30 text-red-200 border-red-500/30 text-xs w-full"
                     >
                       <UserMinus size={12} className="mr-1" />
                       Disconnect
@@ -174,7 +180,9 @@ export default function Home() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <p className="text-white/80 text-sm mb-2">Enter your friend's Peer ID to connect:</p>
+                  <p className="text-white/80 text-sm mb-2">
+                    Enter your friend's Peer ID to connect:
+                  </p>
                   <div className="flex items-center gap-2 mb-3">
                     <Input
                       value={recipientId}
@@ -216,10 +224,12 @@ export default function Home() {
               } mr-2 animate-pulse`}
             ></div>
             <span className="text-xs text-white/70">
-              {isConnected ? "Online - Ready to share" : "Waiting for connection"}
+              {isConnected
+                ? "Online - Ready to share"
+                : "Waiting for connection"}
             </span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* QR Code Modal */}
@@ -243,7 +253,9 @@ export default function Home() {
                 <h3 className="text-lg font-medium text-white mb-3">
                   Peer ID QR Code
                 </h3>
-                <p className="text-white/70 text-xs mb-3">Let others scan this to connect with you</p>
+                <p className="text-white/70 text-xs mb-3">
+                  Let others scan this to connect with you
+                </p>
                 <div className="bg-white p-3 rounded-xl shadow-inner">
                   <QRCodeSVG value={peerId} size={180} />
                 </div>

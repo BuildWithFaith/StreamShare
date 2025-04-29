@@ -9,6 +9,10 @@
   --animate-fourth: moveHorizontal 40s ease infinite;
   --animate-fifth: moveInCircle 20s ease infinite;
 
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Merriweather', serif;
+  --font-mono: 'Fira Code', monospace;
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
@@ -88,6 +92,19 @@
     100% {
       transform: translateY(-50%);
     }
+  }
+}
+
+@layer base {
+  html {
+    font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+/* Or create a custom utility class */
+@layer utilities {
+  .font-helvetica {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
 
