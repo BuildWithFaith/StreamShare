@@ -1,11 +1,10 @@
 "use client"
-import BackgroundProcessor from "@/components/background-processor"
 import ControlBar from "@/components/control-bar"
 import { toast } from "@/components/ui-toast"
 import PageSeo from "@/components/VideoCallSeo"
 import { usePeer } from "@/contexts/PeerContext"
 import { useCameraSwitch } from "@/hooks/use-camera-switch"
-import { Loader2, Monitor, VideoIcon } from 'lucide-react'
+import { Loader2, Monitor, VideoIcon } from "lucide-react"
 import type { MediaConnection } from "peerjs"
 import { useCallback, useEffect, useRef, useState } from "react"
 // Import the useScreenShare hook at the top with other imports
@@ -26,11 +25,18 @@ interface ExtendedNavigator extends Navigator {
 
 // Define this outside the component
 function debounce(fn: Function, delay: number) {
-  let timeoutId: NodeJS.Timeout | null = null;
-  return function(...args: any[]) {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
-  };
+  let timeoutId: NodeJS.Timeout | null = null
+  return (...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
+// Add dynamic import function for BackgroundProcessor
+async function getBackgroundProcessor() {
+  if (typeof window === "undefined") return null
+  const module = await import("@/components/background-processor")
+  return module.default
 }
 
 export default function Home() {
@@ -70,24 +76,24 @@ export default function Home() {
   const [shouldMirror, setShouldMirror] = useState(false)
   // Replace the existing aspect ratio state variables with these optimized versions
   const [videoMetrics, setVideoMetrics] = useState<{
-    localAspectRatio: number;
-    remoteAspectRatio: number;
-    isLocalPortrait: boolean;
-    isRemotePortrait: boolean;
+    localAspectRatio: number
+    remoteAspectRatio: number
+    isLocalPortrait: boolean
+    isRemotePortrait: boolean
   }>({
     localAspectRatio: 16 / 9, // Default to 16:9
     remoteAspectRatio: 16 / 9,
     isLocalPortrait: false,
-    isRemotePortrait: false
+    isRemotePortrait: false,
   })
   const [windowDimensions, setWindowDimensions] = useState<{
-    width: number;
-    height: number;
-    isPortrait: boolean;
+    width: number
+    height: number
+    isPortrait: boolean
   }>({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080,
-    isPortrait: typeof window !== 'undefined' ? window.innerHeight > window.innerWidth : false
+    width: typeof window !== "undefined" ? window.innerWidth : 1920,
+    height: typeof window !== "undefined" ? window.innerHeight : 1080,
+    isPortrait: typeof window !== "undefined" ? window.innerHeight > window.innerWidth : false,
   })
 
   // Use the camera switch hook
@@ -399,8 +405,7 @@ export default function Home() {
     } catch (error) {
       console.error("Error stopping screen share:", error)
       setIsLoading(false)
-      toast.error("Failed to stop screen sharing",
-      )
+      toast.error("Failed to stop screen sharing")
     }
   }, [cameraStream, previousStream, processCameraStream, stopScreenShareHook, updateRemoteStream, toast])
 
@@ -519,7 +524,7 @@ export default function Home() {
 
   // Update the handleBackgroundRemovalToggle function to use the state
   const handleBackgroundRemovalToggle = useCallback(
-    (enabled: boolean | ((prev: boolean) => boolean)) => {
+    async (enabled: boolean | ((prev: boolean) => boolean)) => {
       // Convert function-style state updates to boolean
       const newEnabled = typeof enabled === "function" ? enabled(backgroundRemovalEnabled) : enabled
 
@@ -538,137 +543,149 @@ export default function Home() {
       setBackgroundRemovalEnabled(newEnabled)
 
       // Use an async IIFE to handle the async operations
-      ;(async () => {
-        try {
-          if (!newEnabled) {
-            // Turning OFF background removal
-            console.log("Turning OFF background removal")
+      try {
+        if (!newEnabled) {
+          // Turning OFF background removal
+          console.log("Turning OFF background removal")
 
-            // Make sure we have a valid local stream before stopping background removal
-            if (!localStream) {
-              throw new Error("No camera stream available")
-            }
+          // Make sure we have a valid local stream before stopping background removal
+          if (!localStream) {
+            throw new Error("No camera stream available")
+          }
 
-            // Create a clone of the local stream to ensure we have a fresh stream
-            const freshStream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                deviceId: localStream.getVideoTracks()[0]?.getSettings()?.deviceId
-                  ? {
-                      exact: localStream.getVideoTracks()[0].getSettings().deviceId,
-                    }
-                  : undefined,
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-              },
-              audio: localStream.getAudioTracks().length > 0,
+          // Create a clone of the local stream to ensure we have a fresh stream
+          const freshStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              deviceId: localStream.getVideoTracks()[0]?.getSettings()?.deviceId
+                ? {
+                    exact: localStream.getVideoTracks()[0].getSettings().deviceId,
+                  }
+                : undefined,
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: localStream.getAudioTracks().length > 0,
+          })
+
+          // Apply current audio mute state to the fresh stream
+          if (freshStream.getAudioTracks().length > 0) {
+            freshStream.getAudioTracks().forEach((track) => {
+              track.enabled = !isAudioMuted
             })
+          }
 
-            // Apply current audio mute state to the fresh stream
-            if (freshStream.getAudioTracks().length > 0) {
-              freshStream.getAudioTracks().forEach((track) => {
-                track.enabled = !isAudioMuted
-              })
-            }
+          // Apply current video enabled state to the fresh stream
+          if (freshStream.getVideoTracks().length > 0) {
+            freshStream.getVideoTracks().forEach((track) => {
+              track.enabled = isVideoEnabled
+            })
+          }
 
-            // Apply current video enabled state to the fresh stream
-            if (freshStream.getVideoTracks().length > 0) {
-              freshStream.getVideoTracks().forEach((track) => {
-                track.enabled = isVideoEnabled
-              })
-            }
-
+          // Dynamically import BackgroundProcessor
+          const BackgroundProcessor = await getBackgroundProcessor()
+          if (BackgroundProcessor) {
             // Stop the rendering loop and clean up WebGL resources
             BackgroundProcessor.stopRendering()
             BackgroundProcessor.cleanup()
-
-            // Clear the processed stream reference
-            processedStreamRef.current = null
-
-            // Set the local stream to the fresh stream
-            setLocalStream(freshStream)
-
-            // For local display: Use the original stream with CSS mirroring
-            if (localVideoRef.current) {
-              localVideoRef.current.srcObject = freshStream
-              console.log("Set video source to fresh stream")
-              // CSS mirroring is applied via className
-            }
-
-            // For remote stream: Process with canvas-based mirroring
-            const processedStream = await processCameraStream(freshStream)
-
-            // If in a call, update the remote stream with the processed stream
-            if (activeCall) {
-              await updateRemoteStream(processedStream)
-              needsRemoteUpdateRef.current = false
-            }
-          } else {
-            // Turning ON background removal
-            console.log("Turning ON background removal")
-
-            if (!localStream) {
-              throw new Error("No camera stream available")
-            }
-
-            // First, apply mirroring if needed before passing to background removal
-            const preparedStream = await prepareStreamForBackgroundRemoval(localStream)
-
-            // Process the stream with background removal
-            const processedStream = await BackgroundProcessor.processStreamWithBackgroundRemoval({
-              stream: preparedStream,
-              selectedBackground,
-              isAudioMuted,
-              canvasRef,
-              backgroundImageRef,
-              setLocalStream: (stream) => {
-                // Store the processed stream in the ref
-                processedStreamRef.current = stream
-
-                // Set the video source to the processed stream immediately
-                if (localVideoRef.current) {
-                  localVideoRef.current.srcObject = stream
-                  console.log("Set video source to processed stream")
-                }
-              },
-            })
-
-            // Store the processed stream in the ref
-            processedStreamRef.current = processedStream
-
-            // If in a call, update the remote stream
-            if (activeCall) {
-              await updateRemoteStream(processedStream)
-              needsRemoteUpdateRef.current = false
-            }
           }
-        } catch (error) {
-          console.error("Error toggling background removal:", error)
 
-          // If there was an error, revert to the previous state
-          setBackgroundRemovalEnabled(!newEnabled)
+          // Clear the processed stream reference
+          processedStreamRef.current = null
 
-          // Show error toast
-          toast.error("Failed to toggle background removal. Please try again")
+          // Set the local stream to the fresh stream
+          setLocalStream(freshStream)
 
-          // Clean up if needed
-          if (newEnabled) {
+          // For local display: Use the original stream with CSS mirroring
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = freshStream
+            console.log("Set video source to fresh stream")
+            // CSS mirroring is applied via className
+          }
+
+          // For remote stream: Process with canvas-based mirroring
+          const processedStream = await processCameraStream(freshStream)
+
+          // If in a call, update the remote stream with the processed stream
+          if (activeCall) {
+            await updateRemoteStream(processedStream)
+            needsRemoteUpdateRef.current = false
+          }
+        } else {
+          // Turning ON background removal
+          console.log("Turning ON background removal")
+
+          if (!localStream) {
+            throw new Error("No camera stream available")
+          }
+
+          // First, apply mirroring if needed before passing to background removal
+          const preparedStream = await prepareStreamForBackgroundRemoval(localStream)
+
+          // Dynamically import BackgroundProcessor
+          const BackgroundProcessor = await getBackgroundProcessor()
+          if (!BackgroundProcessor) {
+            throw new Error("Failed to load background processor")
+          }
+
+          // Process the stream with background removal
+          const processedStream = await BackgroundProcessor.processStreamWithBackgroundRemoval({
+            stream: preparedStream,
+            selectedBackground,
+            isAudioMuted,
+            canvasRef,
+            backgroundImageRef,
+            setLocalStream: (stream) => {
+              // Store the processed stream in the ref
+              processedStreamRef.current = stream
+
+              // Set the video source to the processed stream immediately
+              if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream
+                console.log("Set video source to processed stream")
+              }
+            },
+          })
+
+          // Store the processed stream in the ref
+          processedStreamRef.current = processedStream
+
+          // If in a call, update the remote stream
+          if (activeCall) {
+            await updateRemoteStream(processedStream)
+            needsRemoteUpdateRef.current = false
+          }
+        }
+      } catch (error) {
+        console.error("Error toggling background removal:", error)
+
+        // If there was an error, revert to the previous state
+        setBackgroundRemovalEnabled(!newEnabled)
+
+        // Show error toast
+        toast.error("Failed to toggle background removal. Please try again")
+
+        // Clean up if needed
+        if (newEnabled) {
+          // Dynamically import BackgroundProcessor for cleanup
+          const BackgroundProcessor = await getBackgroundProcessor()
+          if (BackgroundProcessor) {
             BackgroundProcessor.stopRendering()
             BackgroundProcessor.cleanup()
-            processedStreamRef.current = null
-
-            // Make sure we restore the raw stream to the video element
-            if (localVideoRef.current && localStream) {
-              // Process the stream for display
-              const processedStream = await processCameraStream(localStream)
-              localVideoRef.current.srcObject = processedStream
-            }
           }
-        } finally {
-          // Clear loading states
-          setIsLoading(false)
-          setIsBackgroundProcessing(false)
+          processedStreamRef.current = null
+
+          // Make sure we restore the raw stream to the video element
+          if (localVideoRef.current && localStream) {
+            // Process the stream for display
+            const processedStream = await processCameraStream(localStream)
+            localVideoRef.current.srcObject = processedStream
+          }
         }
-      })()
+      } finally {
+        // Clear loading states
+        setIsLoading(false)
+        setIsBackgroundProcessing(false)
+      }
     },
     [
       backgroundRemovalEnabled,
@@ -745,16 +762,16 @@ export default function Home() {
       setIsLoading(false)
     }
   }, [
-    hasMultipleCameras, 
-    switchCamera, 
-    updateMirrorState, 
-    backgroundRemovalEnabled, 
-    processCameraStream, 
-    activeCall, 
-    updateRemoteStream, 
-    currentCameraName, 
-    toast, 
-    handleBackgroundRemovalToggle
+    hasMultipleCameras,
+    switchCamera,
+    updateMirrorState,
+    backgroundRemovalEnabled,
+    processCameraStream,
+    activeCall,
+    updateRemoteStream,
+    currentCameraName,
+    toast,
+    handleBackgroundRemovalToggle,
   ])
 
   // Start/End call functions
@@ -891,28 +908,31 @@ export default function Home() {
       toast.error(`${error.message || "Failed to start call. Please check your camera and microphone."}`)
     }
   }, [
-    peer, 
-    connectedPeerId, 
-    localStream, 
-    startStream, 
-    devices, 
-    currentDeviceIndex, 
-    backgroundRemovalEnabled, 
-    processCameraStream, 
-    isAudioMuted, 
-    callStatus, 
-    toast
+    peer,
+    connectedPeerId,
+    localStream,
+    startStream,
+    devices,
+    currentDeviceIndex,
+    backgroundRemovalEnabled,
+    processCameraStream,
+    isAudioMuted,
+    callStatus,
+    toast,
   ])
 
   // End a call
-  const endCall = useCallback(() => {
+  const endCall = useCallback(async () => {
     console.log("📞 Ending call...")
     setCallStatus("ending")
     setIsLoading(true)
 
     // First, stop the background processor rendering loop
     if (backgroundRemovalEnabled) {
-      BackgroundProcessor.stopRendering()
+      const BackgroundProcessor = await getBackgroundProcessor()
+      if (BackgroundProcessor) {
+        BackgroundProcessor.stopRendering()
+      }
     }
 
     // Close the active call
@@ -998,7 +1018,10 @@ export default function Home() {
 
     // Clean up WebGL resources if background removal was enabled
     if (backgroundRemovalEnabled) {
-      BackgroundProcessor.cleanup()
+      const BackgroundProcessor = await getBackgroundProcessor()
+      if (BackgroundProcessor) {
+        BackgroundProcessor.cleanup()
+      }
       processedStreamRef.current = null
     }
 
@@ -1009,15 +1032,15 @@ export default function Home() {
 
     console.log("✅ Call ended successfully")
   }, [
-    backgroundRemovalEnabled, 
-    activeCall, 
-    isScreenSharing, 
-    screenStream, 
-    stopScreenShareHook, 
-    peer, 
-    localVideoRef, 
-    remoteVideoRef, 
-    canvasRef
+    backgroundRemovalEnabled,
+    activeCall,
+    isScreenSharing,
+    screenStream,
+    stopScreenShareHook,
+    peer,
+    localVideoRef,
+    remoteVideoRef,
+    canvasRef,
   ])
 
   // Toggle audio mute state
@@ -1073,57 +1096,55 @@ export default function Home() {
   }, [localStream, isVideoEnabled])
 
   // Replace the getObjectFit function with this memoized and optimized version
-  const getObjectFit = useCallback((isLocalVideo: boolean = false) => {
-    // For screen sharing, always use contain to show the entire screen
-    if (isScreenSharing) return "contain";
-    
-    const {
-      localAspectRatio,
-      remoteAspectRatio,
-      isLocalPortrait,
-      isRemotePortrait
-    } = videoMetrics;
-    
-    const { isPortrait: isDevicePortrait } = windowDimensions;
-    
-    // For local video (PiP)
-    if (isLocalVideo) {
-      // If background removal is enabled, always use cover
-      if (backgroundRemovalEnabled) return "cover";
-      
-      // If it's a selfie camera (mirrored), prioritize seeing your face
-      if (shouldMirror) return "cover";
-      
-      // For back cameras or non-mirrored views, adapt based on aspect ratio
-      // If video and device have matching orientations, use cover
-      if ((isLocalPortrait && isDevicePortrait) || (!isLocalPortrait && !isDevicePortrait)) {
-        return "cover";
+  const getObjectFit = useCallback(
+    (isLocalVideo = false) => {
+      // For screen sharing, always use contain to show the entire screen
+      if (isScreenSharing) return "contain"
+
+      const { localAspectRatio, remoteAspectRatio, isLocalPortrait, isRemotePortrait } = videoMetrics
+
+      const { isPortrait: isDevicePortrait } = windowDimensions
+
+      // For local video (PiP)
+      if (isLocalVideo) {
+        // If background removal is enabled, always use cover
+        if (backgroundRemovalEnabled) return "cover"
+
+        // If it's a selfie camera (mirrored), prioritize seeing your face
+        if (shouldMirror) return "cover"
+
+        // For back cameras or non-mirrored views, adapt based on aspect ratio
+        // If video and device have matching orientations, use cover
+        if ((isLocalPortrait && isDevicePortrait) || (!isLocalPortrait && !isDevicePortrait)) {
+          return "cover"
+        }
+        // If orientations don't match, use contain to see everything
+        return "contain"
       }
-      // If orientations don't match, use contain to see everything
-      return "contain";
-    }
-    
-    // For remote video (main view)
-    // If video and device have matching orientations, use cover for a more immersive experience
-    if ((isRemotePortrait && isDevicePortrait) || (!isRemotePortrait && !isDevicePortrait)) {
-      return "cover";
-    }
-    
-    // If video is landscape but device is portrait
-    if (!isRemotePortrait && isDevicePortrait) {
-      // For very wide videos (like 21:9 or wider), use contain to avoid excessive cropping
-      return remoteAspectRatio > 2.1 ? "contain" : "cover";
-    }
-    
-    // If video is portrait but device is landscape
-    if (isRemotePortrait && !isDevicePortrait) {
-      // For very tall videos, use contain
-      return remoteAspectRatio < 0.5 ? "contain" : "cover";
-    }
-    
-    // Default fallback
-    return "cover";
-  }, [videoMetrics, windowDimensions, isScreenSharing, backgroundRemovalEnabled, shouldMirror]);
+
+      // For remote video (main view)
+      // If video and device have matching orientations, use cover for a more immersive experience
+      if ((isRemotePortrait && isDevicePortrait) || (!isRemotePortrait && !isDevicePortrait)) {
+        return "cover"
+      }
+
+      // If video is landscape but device is portrait
+      if (!isRemotePortrait && isDevicePortrait) {
+        // For very wide videos (like 21:9 or wider), use contain to avoid excessive cropping
+        return remoteAspectRatio > 2.1 ? "contain" : "cover"
+      }
+
+      // If video is portrait but device is landscape
+      if (isRemotePortrait && !isDevicePortrait) {
+        // For very tall videos, use contain
+        return remoteAspectRatio < 0.5 ? "contain" : "cover"
+      }
+
+      // Default fallback
+      return "cover"
+    },
+    [videoMetrics, windowDimensions, isScreenSharing, backgroundRemovalEnabled, shouldMirror],
+  )
 
   // Update the useEffect that initializes mirroring state to run on component mount
   useEffect(() => {
@@ -1265,6 +1286,12 @@ export default function Home() {
             // First, apply mirroring if needed before passing to background removal
             const preparedStream = await prepareStreamForBackgroundRemoval(localStream)
 
+            // Dynamically import BackgroundProcessor
+            const BackgroundProcessor = await getBackgroundProcessor()
+            if (!BackgroundProcessor) {
+              throw new Error("Failed to load background processor")
+            }
+
             const processedStream = await BackgroundProcessor.processStreamWithBackgroundRemoval({
               stream: preparedStream,
               selectedBackground,
@@ -1309,94 +1336,94 @@ export default function Home() {
   // Replace the existing useEffect for handling orientation changes with this optimized version
   useEffect(() => {
     const updateDimensions = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const isPortrait = height > width;
-      
-      setWindowDimensions(prev => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const isPortrait = height > width
+
+      setWindowDimensions((prev) => {
         // Only update if values have changed to prevent unnecessary re-renders
         if (prev.width !== width || prev.height !== height || prev.isPortrait !== isPortrait) {
-          return { width, height, isPortrait };
+          return { width, height, isPortrait }
         }
-        return prev;
-      });
-    };
-    
+        return prev
+      })
+    }
+
     // Initial update
-    updateDimensions();
-    
+    updateDimensions()
+
     // Debounced resize handler to improve performance
-    const debouncedUpdateDimensions = debounce(updateDimensions, 200);
-    
-    window.addEventListener("resize", debouncedUpdateDimensions);
-    window.addEventListener("orientationchange", updateDimensions); // Immediate update on orientation change
-    
+    const debouncedUpdateDimensions = debounce(updateDimensions, 200)
+
+    window.addEventListener("resize", debouncedUpdateDimensions)
+    window.addEventListener("orientationchange", updateDimensions) // Immediate update on orientation change
+
     return () => {
-      window.removeEventListener("resize", debouncedUpdateDimensions);
-      window.removeEventListener("orientationchange", updateDimensions);
-    };
-  }, []);
+      window.removeEventListener("resize", debouncedUpdateDimensions)
+      window.removeEventListener("orientationchange", updateDimensions)
+    }
+  }, [])
 
   // Replace the existing useEffect for tracking video track aspect ratio with this optimized version
   useEffect(() => {
     const updateVideoMetrics = () => {
-      if (!localStream && !remoteStream) return;
-      
-      const newMetrics = { ...videoMetrics };
-      let hasChanges = false;
-      
+      if (!localStream && !remoteStream) return
+
+      const newMetrics = { ...videoMetrics }
+      let hasChanges = false
+
       // Update local stream metrics
       if (localStream) {
-        const videoTrack = localStream.getVideoTracks()[0];
+        const videoTrack = localStream.getVideoTracks()[0]
         if (videoTrack) {
-          const settings = videoTrack.getSettings();
+          const settings = videoTrack.getSettings()
           if (settings.width && settings.height) {
-            const aspectRatio = settings.width / settings.height;
-            const isPortrait = settings.height > settings.width;
-            
+            const aspectRatio = settings.width / settings.height
+            const isPortrait = settings.height > settings.width
+
             if (newMetrics.localAspectRatio !== aspectRatio || newMetrics.isLocalPortrait !== isPortrait) {
-              newMetrics.localAspectRatio = aspectRatio;
-              newMetrics.isLocalPortrait = isPortrait;
-              hasChanges = true;
+              newMetrics.localAspectRatio = aspectRatio
+              newMetrics.isLocalPortrait = isPortrait
+              hasChanges = true
             }
           }
         }
       }
-      
+
       // Update remote stream metrics
       if (remoteStream) {
-        const videoTrack = remoteStream.getVideoTracks()[0];
+        const videoTrack = remoteStream.getVideoTracks()[0]
         if (videoTrack) {
-          const settings = videoTrack.getSettings();
+          const settings = videoTrack.getSettings()
           if (settings.width && settings.height) {
-            const aspectRatio = settings.width / settings.height;
-            const isPortrait = settings.height > settings.width;
-            
+            const aspectRatio = settings.width / settings.height
+            const isPortrait = settings.height > settings.width
+
             if (newMetrics.remoteAspectRatio !== aspectRatio || newMetrics.isRemotePortrait !== isPortrait) {
-              newMetrics.remoteAspectRatio = aspectRatio;
-              newMetrics.isRemotePortrait = isPortrait;
-              hasChanges = true;
+              newMetrics.remoteAspectRatio = aspectRatio
+              newMetrics.isRemotePortrait = isPortrait
+              hasChanges = true
             }
           }
         }
       }
-      
+
       // Only update state if there are actual changes
       if (hasChanges) {
-        setVideoMetrics(newMetrics);
+        setVideoMetrics(newMetrics)
       }
-    };
-    
+    }
+
     // Update metrics immediately
-    updateVideoMetrics();
-    
+    updateVideoMetrics()
+
     // Set up interval to periodically check for changes (some browsers don't reliably fire events)
-    const intervalId = setInterval(updateVideoMetrics, 2000);
-    
+    const intervalId = setInterval(updateVideoMetrics, 2000)
+
     return () => {
-      clearInterval(intervalId);
-    };
-  }, [localStream, remoteStream, videoMetrics]);
+      clearInterval(intervalId)
+    }
+  }, [localStream, remoteStream, videoMetrics])
 
   // Add this new useEffect after the other useEffects to handle page visibility
   useEffect(() => {
@@ -1587,23 +1614,23 @@ export default function Home() {
         <div className="relative w-full max-w-5xl flex justify-center aspect-[9/16] xl:aspect-video rounded-2xl backdrop-blur-xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
           {/* Remote Video */}
           {remoteStream ? (
-            <video 
-              ref={remoteVideoRef} 
-              autoPlay 
-              playsInline 
-              className="w-full h-full aspect-video" 
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full aspect-video"
               style={{ objectFit: getObjectFit() }}
               onLoadedMetadata={(e) => {
-                const video = e.currentTarget;
+                const video = e.currentTarget
                 if (video.videoWidth && video.videoHeight) {
-                  const aspectRatio = video.videoWidth / video.videoHeight;
-                  const isPortrait = video.videoHeight > video.videoWidth;
-                  
-                  setVideoMetrics(prev => ({
+                  const aspectRatio = video.videoWidth / video.videoHeight
+                  const isPortrait = video.videoHeight > video.videoWidth
+
+                  setVideoMetrics((prev) => ({
                     ...prev,
                     remoteAspectRatio: aspectRatio,
-                    isRemotePortrait: isPortrait
-                  }));
+                    isRemotePortrait: isPortrait,
+                  }))
                 }
               }}
             />
@@ -1627,16 +1654,16 @@ export default function Home() {
                 className={`w-full h-full ${shouldMirror && !backgroundRemovalEnabled ? "scale-x-[-1]" : ""}`}
                 style={{ objectFit: getObjectFit(true) }}
                 onLoadedMetadata={(e) => {
-                  const video = e.currentTarget;
+                  const video = e.currentTarget
                   if (video.videoWidth && video.videoHeight) {
-                    const aspectRatio = video.videoWidth / video.videoHeight;
-                    const isPortrait = video.videoHeight > video.videoWidth;
-                    
-                    setVideoMetrics(prev => ({
+                    const aspectRatio = video.videoWidth / video.videoHeight
+                    const isPortrait = video.videoHeight > video.videoWidth
+
+                    setVideoMetrics((prev) => ({
                       ...prev,
                       localAspectRatio: aspectRatio,
-                      isLocalPortrait: isPortrait
-                    }));
+                      isLocalPortrait: isPortrait,
+                    }))
                   }
                 }}
               />
