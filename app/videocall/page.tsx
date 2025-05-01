@@ -1580,7 +1580,7 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div>
       <PageSeo />
 
       <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
@@ -1713,6 +1713,6 @@ export default function Home() {
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

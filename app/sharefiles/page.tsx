@@ -691,7 +691,7 @@ export default function FilesPage() {
   }
 
   return (
-    <>
+    <div>
     <PageSeo />
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="container max-w-4xl">
@@ -1001,6 +1001,6 @@ export default function FilesPage() {
         </div>
       )}
     </div>
-    </>
+    </div>
   )
 }
