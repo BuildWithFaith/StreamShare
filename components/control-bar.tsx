@@ -1,9 +1,9 @@
 "use client"
 
-import type React from "react"
 import { Button } from "@/components/ui/button"
-import { Mic, MicOff, Video, VideoOff, Phone, PhoneOff, Monitor, StopCircle, Camera, Image } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Camera, Image, Mic, MicOff, Monitor, Phone, PhoneOff, StopCircle, Video, VideoOff } from "lucide-react"
+import type React from "react"
 
 interface ControlBarProps {
   remoteStream: MediaStream | null
@@ -56,7 +56,7 @@ const ControlBar: React.FC<ControlBarProps> = ({
   ]
 
   return (
-    <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-wrap">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-nowrap">
       {/* Audio toggle button */}
       <Button
         onClick={toggleAudio}

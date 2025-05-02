@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useState, useEffect, useContext } from "react";
+import { toast } from "@/components/ui-toast";
 import Peer, { DataConnection } from "peerjs";
-import { toast } from "@/components/ui-toast"
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface PeerContextType {
   peer: Peer | null;
@@ -55,7 +55,7 @@ export function PeerProvider({ children }: { children: React.ReactNode }) {
 
     newPeer.on("error", (err) => {
       toast.error(`Connection Error,
-        err.message`);
+        ${err.message}`);
     });
 
     return () => {

@@ -1610,7 +1610,7 @@ export default function Home() {
     <div>
       <PageSeo />
 
-      <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
+      <div className="fixed inset-4 flex items-center justify-center sm:p-4">
         <div className="relative w-full max-w-5xl flex justify-center aspect-[9/16] xl:aspect-video rounded-2xl backdrop-blur-xl border border-white/20 bg-white/5 shadow-xl overflow-hidden">
           {/* Remote Video */}
           {remoteStream ? (
@@ -1635,7 +1635,7 @@ export default function Home() {
               }}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center w-full h-full bg-/10">
+            <div className="flex flex-col items-center justify-center w-full h-full">
               <div className="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 mb-4 rounded-full bg-white">
                 <VideoIcon className="w-8 h-8 text-black" />
               </div>
@@ -1645,7 +1645,7 @@ export default function Home() {
 
           {/* Local Video (PiP) */}
           {!isScreenSharing && (
-            <div className="absolute top-2 sm:top-4 left-2 sm:left-4 w-28 sm:w-32 md:w-36 lg:w-40 xl:w-48 aspect-video rounded-lg overflow-hidden shadow-md">
+            <div className="absolute top-2 sm:top-4 left-2 sm:left-4 w-38 lg:w-40 xl:w-48 aspect-video rounded-lg overflow-hidden shadow-md">
               <video
                 ref={localVideoRef}
                 autoPlay
