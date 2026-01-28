@@ -98,6 +98,7 @@
 @layer base {
   html {
     font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
 }
 

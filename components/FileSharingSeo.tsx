@@ -1,48 +1,15 @@
-import { Metadata } from "next";
 import Head from "next/head";
 
-// Define metadata for SEO
-export const metadata: Metadata = {
-  title: "Peer-to-Peer File Sharing | Secure, Instant & Serverless",
-  description:
-    "Instantly share files over secure peer-to-peer connections with real-time progress, previews, and full transfer history — no servers or uploads needed.",
-  keywords:
-    "file sharing, peer-to-peer file transfer, WebRTC file sharing, secure file sharing, instant file transfer, file preview, drag and drop upload, send files fast, download files online, real-time file sharing",
-  authors: [{ name: "Muhammad Wahaj" }],
-  category: "Technology",
-  openGraph: {
-    title: "Peer-to-Peer File Sharing | Secure, Instant & Serverless",
-    description:
-      "Instantly share files of any type between browsers with real-time transfer, previews, and complete control. Built with WebRTC for true P2P transfers.",
-    images: [
-      {
-        url: "/screenshots/file-share.png",
-        width: 1920,
-        height: 1080,
-        alt: "File sharing app showing a real-time file transfer interface",
-      },
-    ],
-    type: "website",
-    siteName: "streamlet",
-  },
-  robots: {
-    index: true,
-  },
-  themeColor: "#ffffff",
-  other: {
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
-  },
-};
-
-export default function PageSeo() {
-  // JSON-LD structured data for WebApplication (File Sharing)
-  const structuredData = {
+export default function FileSharingSeo() {
+  const webApplicationData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Peer-to-Peer File Sharing App",
+    name: "StreamShare File Sharing",
+    description:
+      "Secure peer-to-peer file sharing with real-time progress tracking, file previews, and complete transfer control.",
     applicationCategory: "UtilityApplication",
     operatingSystem: "All",
+    browserRequirements: "Requires WebRTC support",
     offers: {
       "@type": "Offer",
       price: "0",
@@ -53,20 +20,104 @@ export default function PageSeo() {
       ratingValue: "4.9",
       ratingCount: "1287",
     },
-    featureList:
-      "Drag and drop upload, File preview, Real-time transfer, Pause/resume/cancel, Secure peer-to-peer connection, Download history",
-    screenshot: "https://streamlet.vercel.app/screenshots/file-share.png",
-    browserRequirements: "Requires WebRTC support",
+    featureList: [
+      "Drag and drop file upload",
+      "Real-time file preview for images, videos, audio, and documents",
+      "Live transfer progress with speed and time estimates",
+      "Pause, resume, and cancel file transfers",
+      "Secure peer-to-peer connection with encryption",
+      "Complete download and upload history",
+      "Support for all file types and sizes",
+      "No server storage - direct peer connections",
+    ],
+    screenshot: "https://streamshare.vercel.app/screenshots/file-share.png",
+    author: {
+      "@type": "Person",
+      name: "Muhammad Wahaj",
+      url: "https://contra.com/muhammadwahajofficiall_f1yj87dw/services",
+    },
+  };
+
+  const howToData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to Share Files with StreamShare",
+    description:
+      "Step-by-step guide to sharing files securely using peer-to-peer technology",
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "Connect with a Peer",
+        text: "Share your Peer ID with the person you want to send files to, or enter their Peer ID to connect.",
+        url: "https://streamshare.vercel.app",
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: "Navigate to File Sharing",
+        text: "Click on the 'Share Files' option in the navigation menu.",
+        url: "https://streamshare.vercel.app/sharefiles",
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "Select or Drag Files",
+        text: "Either drag and drop files into the upload area or click to browse and select files from your device.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 4,
+        name: "Monitor Transfer",
+        text: "Watch real-time progress with transfer speed, time remaining, and the ability to pause, resume, or cancel at any time.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 5,
+        name: "Complete Transfer",
+        text: "Once the transfer is complete, the recipient can download the file directly. All transfers are logged in your history.",
+      },
+    ],
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://streamshare.vercel.app",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "File Sharing",
+        item: "https://streamshare.vercel.app/sharefiles",
+      },
+    ],
   };
 
   return (
     <>
       <Head>
-
-        {/* Add structured data */}
+        {/* WebApplication structured data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webApplicationData),
+          }}
+        />
+        {/* HowTo structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToData) }}
+        />
+        {/* Breadcrumb structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
         />
       </Head>
 
@@ -75,20 +126,45 @@ export default function PageSeo() {
         <p>
           Share files instantly and securely without any server involvement.
           Connect with a peer and send files directly from your browser using
-          WebRTC-powered technology.
+          WebRTC-powered technology with end-to-end encryption.
         </p>
-        <p>Key features include:</p>
+
+        <h2>Key Features</h2>
         <ul>
-          <li>Real-time progress tracking and estimated time remaining</li>
-          <li>Drag-and-drop file uploading with support for all formats</li>
-          <li>In-browser previews for images, videos, audio, and text files</li>
+          <li>Real-time progress tracking with transfer speed and estimated time remaining</li>
+          <li>Drag-and-drop file uploading with support for all file formats and sizes</li>
+          <li>In-browser previews for images, videos, audio, PDFs, and text files</li>
           <li>Pause, resume, and cancel transfers with full control</li>
-          <li>Access and manage your file sharing history</li>
+          <li>Access and manage your complete file sharing history</li>
           <li>100% peer-to-peer with no files ever stored on a server</li>
+          <li>Secure encrypted connections for maximum privacy</li>
+          <li>No file size limits - share files of any size</li>
         </ul>
+
+        <h2>How to Share Files</h2>
+        <ol>
+          <li>Connect with a peer by sharing your unique Peer ID</li>
+          <li>Navigate to the File Sharing section</li>
+          <li>Drag and drop files or click to browse and select</li>
+          <li>Monitor real-time transfer progress</li>
+          <li>Complete the transfer - files go directly to the recipient</li>
+        </ol>
+
+        <h2>Perfect For</h2>
         <p>
-          Perfect for developers, freelancers, educators, and remote teams who
-          need a fast and secure way to share files without hassle.
+          StreamShare file sharing is perfect for developers, freelancers,
+          educators, students, remote teams, and anyone who needs a fast,
+          secure, and private way to share files without relying on cloud
+          storage or email attachments.
+        </p>
+
+        <h2>Why Choose Peer-to-Peer File Sharing?</h2>
+        <p>
+          Unlike traditional file sharing services that upload your files to
+          servers, StreamShare uses direct peer-to-peer connections. This means
+          your files never touch our servers, ensuring complete privacy and
+          faster transfer speeds. No storage limits, no waiting for uploads and
+          downloads - just instant, direct file transfers.
         </p>
       </div>
     </>
