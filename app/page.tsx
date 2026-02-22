@@ -31,8 +31,40 @@ export default function Home() {
   const [showHelp, setShowHelp] = useState(false);
 
   const copyPeerId = () => {
-    navigator.clipboard.writeText(peerId);
-    toast.success("Peer ID copied to clipboard");
+    const doFallbackCopy = (text: string) => {
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "");
+      el.style.position = "absolute";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      try {
+        document.execCommand("copy");
+      } catch (e) {
+        // ignore - we'll show an error below if needed
+      }
+      document.body.removeChild(el);
+    };
+
+    (async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(peerId);
+        } else {
+          doFallbackCopy(peerId);
+        }
+        toast.success("Peer ID copied to clipboard");
+      } catch (err) {
+        // Try fallback once more then show an error
+        try {
+          doFallbackCopy(peerId);
+          toast.success("Peer ID copied to clipboard");
+        } catch (e) {
+          toast.error("Could not copy Peer ID. Check browser permissions");
+        }
+      }
+    })();
   };
 
   const handleConnect = () => {
@@ -45,6 +77,10 @@ export default function Home() {
 
   const handlePaste = async () => {
     try {
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        toast.error("Paste not supported in this browser");
+        return;
+      }
       const clipboardText = await navigator.clipboard.readText();
       if (clipboardText.trim()) {
         setRecipientId(clipboardText.trim());
@@ -52,7 +88,7 @@ export default function Home() {
         toast.error("Your clipboard doesn't contain any text");
       }
     } catch (error) {
-      toast.error("Could not access clipboard. Please check permissions");
+      toast.error("Could not access clipboard. Please check browser permissions or try again");
     }
   };
 
@@ -186,7 +222,12 @@ export default function Home() {
                   <div className="flex items-center gap-2 mb-3">
                     <Input
                       value={recipientId}
-                      onChange={(e) => setRecipientId(e.target.value)}
+                      onChange={(e) => {
+                        console.log("recipient input change:", e.target.value);
+                        setRecipientId(e.target.value);
+                      }}
+                      onFocus={() => console.log("recipient input focus")}
+                      onBlur={() => console.log("recipient input blur")}
                       placeholder="Paste friend's Peer ID here"
                       className="flex-1 bg-transparent border-white/10 text-white placeholder:text-white/50 rounded-xl focus:border-white/30 focus:ring-white/20 text-sm"
                     />
